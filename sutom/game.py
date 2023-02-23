@@ -1,8 +1,9 @@
 import random
-
+from spellchecker import SpellChecker
 from os import system, name
 
 MAXTURNNUMBER: int = 6
+LANGUAGE: str = "fr"
 
 from sutom.dictionnary import  words
 class Game:
@@ -12,6 +13,7 @@ class Game:
     tested_letters: list[str]
     word_is_not_complete: bool
     number_of_turn_passed: int
+    dictionary: SpellChecker
 
     def __init__(self):
         pass
@@ -23,6 +25,7 @@ class Game:
         self.number_of_turn_passed = 0
         self._set_first_try()
         self.word_is_not_complete = True
+        self.dictionary = SpellChecker(language=LANGUAGE)
 
 
     def _set_first_try(self):
@@ -47,11 +50,16 @@ class Game:
             self.clear()
             self.number_of_turn_passed += 1
 
-    def get_word_from_user(self) -> str:
-        """Try to get a new word from user"""
-        result_word: str = ""
-        while len(result_word) != self.word_length:
-            result_word = input("\nEnter a word to test : \n")
+    def _get_word_from_user(self) -> str:
+        """Try to get a correct new word from user"""
+        result_word: str = "a"
+        while len(result_word) != self.word_length \
+                or len(self.dictionary.known([result_word])) == 0:
+            result_word = input("Entrez un mot : \n")
+            if len(self.dictionary.known([result_word])) == 0:
+                print("Ce n'est pas un mot français")
+            if len(result_word) != self.word_length :
+                print("Ce n'est pas un mot de la bonne longueur")
         return result_word
 
     def _finish_end_game(self):

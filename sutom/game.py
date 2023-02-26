@@ -58,6 +58,7 @@ class Game:
             result_word = input("Entrez un mot : \n")
             if len(self.dictionary.known([result_word])) == 0:
                 print("Ce n'est pas un mot français")
+                continue
             if len(result_word) != self.word_length :
                 print("Ce n'est pas un mot de la bonne longueur")
         return result_word
@@ -105,8 +106,6 @@ class Game:
     def _find_lesser_matches(self, word_to_test: str, test_list: list[bool], result: list[str]):
         """Find other matches that don't have same index"""
         for i in range(0, self.word_length):
-            if not test_list[i]:
-                continue
             for j in range(0, self.word_length):
                 if test_list[j] and word_to_test[i] == self._word_to_find[j]:
                     test_list[j] = False

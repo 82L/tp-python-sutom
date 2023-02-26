@@ -11,6 +11,8 @@ class Game:
     word_length: int
     tested_words: list[list[str]]
     tested_letters: list[str]
+    _letters_hidden_word_not_found: list[bool]
+    _letters_user_word_not_used: list[bool]
     word_is_not_complete: bool
     number_of_turn_passed: int
     dictionary: SpellChecker
@@ -45,8 +47,8 @@ class Game:
                 self.number_of_turn_passed < MAXTURNNUMBER :
             print(f"Turn lefts: {MAXTURNNUMBER-self.number_of_turn_passed}")
             self.print_tries()
-            word_to_test: str = self._get_word_from_user()
-            self.tested_words.append(self._test_word(word_to_test))
+            user_word: str = self._get_word_from_user()
+            self.tested_words.append(self._test_word(user_word))
             self.clear()
             self.number_of_turn_passed += 1
 
@@ -84,31 +86,37 @@ class Game:
         else:
             _ = system('clear')
 
-    def _test_word(self, word_to_test: str) -> list[str]:
+    def _test_word(self, user_word: str) -> list[str]:
         """Test the word to find correspondances"""
-        result : list[str] = list(word_to_test)
-        test_list: list[bool] = self._get_test_list()
-        self._find_all_matches_same_index(word_to_test, test_list, result)
-        if any(test_list):
-            self._find_lesser_matches(word_to_test, test_list, result)
+        result : list[str] = list(user_word)
+        self._letters_hidden_word_not_found: list[bool] = self._get_test_list()
+        self._letters_user_word_not_used: list[bool] = self._get_test_list()
+        self._find_all_matches_same_index(user_word, result)
+        if any(self._letters_hidden_word_not_found):
+            self._find_lesser_matches(user_word, result)
         else:
             self.word_is_not_complete = False
         return result
 
 
-    def _find_all_matches_same_index(self, word_to_test:str, test_list:list[bool], result: list[str]):
+    def _find_all_matches_same_index(self, user_word:str, result: list[str]):
         """Find all same index matches and show it"""
         for i in range(0, self.word_length):
-            if word_to_test[i] == self._word_to_find[i]:
-                test_list[i] = False
+            if user_word[i] == self._word_to_find[i]:
+                self._letters_hidden_word_not_found[i] = False
+                self._letters_user_word_not_used[i] = False
                 result[i] = f"\033[92m{result[i]}\033[00m"
 
-    def _find_lesser_matches(self, word_to_test: str, test_list: list[bool], result: list[str]):
+    def _find_lesser_matches(self, user_word: str, result: list[str]):
         """Find other matches that don't have same index"""
         for i in range(0, self.word_length):
+            if not self._letters_user_word_not_used[i]:
+                continue
             for j in range(0, self.word_length):
-                if test_list[j] and word_to_test[i] == self._word_to_find[j]:
-                    test_list[j] = False
+                if self._letters_hidden_word_not_found[j] and \
+                        user_word[i] == self._word_to_find[j]:
+                    self._letters_hidden_word_not_found[j] = False
+                    self._letters_user_word_not_used[i] = False
                     result[i] = f"\033[93m{result[i]}\033[00m"
                     break
 
